@@ -1,0 +1,402 @@
+<roblox xmlns:xmime="http://www.w3.org/2005/05/xmlmime" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://www.roblox.com/roblox.xsd" version="4"><Item class="Folder" referent="RBX00000004"><Properties><string name="Name">Shared</string></Properties><Item class="ModuleScript" referent="RBX00000001"><Properties><string name="Name">Config</string><ProtectedString name="Source"><![CDATA[--[[
+	Config — tudo que você quer ajustar no jogo fica aqui.
+	Fica no ReplicatedStorage porque o cliente também lê (loja, conquistas, níveis).
+]]
+
+local Config = {}
+
+---------------------------------------------------------------------
+-- DADOS
+---------------------------------------------------------------------
+-- Mudar o nome do DataStore "zera" o progresso de todo mundo (útil para testes).
+Config.DataStoreName = "DoomspireProgress_v1"
+Config.AutosaveInterval = 120 -- segundos
+
+Config.StartingCoins = 100
+
+---------------------------------------------------------------------
+-- RECOMPENSAS
+---------------------------------------------------------------------
+Config.Rewards = {
+	Kill = { XP = 25, Coins = 10 },
+	Win = { XP = 120, Coins = 60 },
+	-- A partir de 3 kills seguidas sem morrer, cada kill extra dá esse bônus de moedas
+	StreakBonusFrom = 3,
+	StreakBonusCoins = 5,
+}
+
+---------------------------------------------------------------------
+-- NÍVEIS
+---------------------------------------------------------------------
+Config.MaxLevel = 100
+
+-- XP necessário para sair do nível `level` e ir para o próximo
+function Config.XPForLevel(level: number): number
+	return math.floor(100 * level ^ 1.35)
+end
+
+-- Títulos que aparecem em cima da cabeça (o maior nível alcançado vale)
+Config.Titles = {
+	{ Level = 1, Title = "Novato" },
+	{ Level = 5, Title = "Construtor" },
+	{ Level = 10, Title = "Demolidor" },
+	{ Level = 20, Title = "Bombardeiro" },
+	{ Level = 35, Title = "Mestre dos Tijolos" },
+	{ Level = 50, Title = "Lenda de Doomspire" },
+	{ Level = 75, Title = "Destruidor de Torres" },
+	{ Level = 100, Title = "Imortal" },
+}
+
+function Config.GetTitle(level: number): string
+	local title = Config.Titles[1].Title
+	for _, entry in ipairs(Config.Titles) do
+		if level >= entry.Level then
+			title = entry.Title
+		end
+	end
+	return title
+end
+
+---------------------------------------------------------------------
+-- LOJA DE GEARS
+---------------------------------------------------------------------
+--[[
+	Cada item pode vir de dois lugares (o primeiro que existir é usado):
+
+	1) Um Tool dentro de ServerStorage > ShopItems com o MESMO nome do `Id`
+	   (ex.: ServerStorage.ShopItems.PeriAlpha). Pegue o gear pela Toolbox,
+	   jogue lá dentro e renomeie. É o jeito mais confiável.
+
+	2) `AssetId`: o número do gear no catálogo do Roblox
+	   (roblox.com/catalog/<NUMERO>/nome-do-gear). O servidor carrega com
+	   InsertService. Só funciona com gears feitos pelo próprio Roblox
+	   (as Periastrons são) ou por você. Deixe 0 para não usar.
+
+	`Color` é só a cor do card na loja.
+]]
+Config.ShopItems = {
+	-- Periastrons (espadas com habilidade especial)
+	-- IDs tirados de listas de gear da internet: se algum não carregar,
+	-- confira o número na URL do item no catálogo do Roblox.
+	{ Id = "PeriAlpha",   Name = "Azure Periastron Alpha",       Price = 1500,  MinLevel = 3,  AssetId = 69499437,  Color = Color3.fromRGB(70, 140, 255) },
+	{ Id = "PeriBeta",    Name = "Grimgold Periastron Beta",     Price = 2500,  MinLevel = 6,  AssetId = 73829193,  Color = Color3.fromRGB(230, 180, 40) },
+	{ Id = "PeriGamma",   Name = "Chartreuse Periastron Gamma",  Price = 4000,  MinLevel = 10, AssetId = 80661504,  Color = Color3.fromRGB(170, 255, 60) },
+	{ Id = "PeriEpsilon", Name = "Joyful Periastron Epsilon",    Price = 9000,  MinLevel = 22, AssetId = 233520257, Color = Color3.fromRGB(255, 120, 200) },
+	{ Id = "PeriOmega",   Name = "Rainbow Periastron Omega",     Price = 25000, MinLevel = 50, AssetId = 159229806, Color = Color3.fromRGB(255, 200, 40), Rainbow = true },
+
+	-- Outras espadas clássicas
+	{ Id = "Illumina",    Name = "Illumina",           Price = 3000,  MinLevel = 8,  AssetId = 16641274, Color = Color3.fromRGB(255, 245, 170) },
+	{ Id = "Darkheart",   Name = "Darkheart",          Price = 3000,  MinLevel = 8,  AssetId = 16895215, Color = Color3.fromRGB(110, 60, 150) },
+	{ Id = "Venomshank",  Name = "Venomshank",         Price = 2000,  MinLevel = 5,  AssetId = 0,        Color = Color3.fromRGB(150, 255, 60) }, -- coloque o ID
+	{ Id = "Firebrand",   Name = "Firebrand",          Price = 2000,  MinLevel = 5,  AssetId = 0,        Color = Color3.fromRGB(255, 130, 30) }, -- coloque o ID
+}
+
+function Config.GetShopItem(id: string)
+	for _, item in ipairs(Config.ShopItems) do
+		if item.Id == id then
+			return item
+		end
+	end
+	return nil
+end
+
+---------------------------------------------------------------------
+-- CONQUISTAS
+---------------------------------------------------------------------
+--[[
+	Stat: qual número é olhado ("Kills", "Wins", "BestStreak", "Level", "OwnedCount")
+	Goal: valor para desbloquear
+	Coins: recompensa
+	BadgeId: id de uma badge do Roblox para dar junto (0 = nenhuma)
+]]
+Config.Achievements = {
+	{ Id = "FirstBlood", Name = "Primeiro Sangue",    Description = "Consiga sua primeira kill",        Stat = "Kills",      Goal = 1,   Coins = 50,   BadgeId = 0 },
+	{ Id = "Kills100",   Name = "Exterminador",       Description = "Consiga 100 kills",                Stat = "Kills",      Goal = 100, Coins = 500,  BadgeId = 0 },
+	{ Id = "Kills1000",  Name = "Máquina de Guerra",  Description = "Consiga 1000 kills",               Stat = "Kills",      Goal = 1000,Coins = 3000, BadgeId = 0 },
+	{ Id = "FirstWin",   Name = "Torre de Pé",        Description = "Vença sua primeira partida",       Stat = "Wins",       Goal = 1,   Coins = 100,  BadgeId = 0 },
+	{ Id = "Wins25",     Name = "Conquistador",       Description = "Vença 25 partidas",                Stat = "Wins",       Goal = 25,  Coins = 1000, BadgeId = 0 },
+	{ Id = "Streak5",    Name = "Imparável",          Description = "Faça 5 kills seguidas sem morrer", Stat = "BestStreak", Goal = 5,   Coins = 250,  BadgeId = 0 },
+	{ Id = "Streak10",   Name = "Lenda Viva",         Description = "Faça 10 kills seguidas sem morrer",Stat = "BestStreak", Goal = 10,  Coins = 750,  BadgeId = 0 },
+	{ Id = "Level10",    Name = "Subindo",            Description = "Chegue ao nível 10",               Stat = "Level",      Goal = 10,  Coins = 300,  BadgeId = 0 },
+	{ Id = "Level50",    Name = "Veterano",           Description = "Chegue ao nível 50",               Stat = "Level",      Goal = 50,  Coins = 2500, BadgeId = 0 },
+	{ Id = "Collector",  Name = "Colecionador",       Description = "Tenha 3 gears da loja",            Stat = "OwnedCount", Goal = 3,   Coins = 500,  BadgeId = 0 },
+}
+
+return Config
+]]></ProtectedString></Properties></Item><Item class="ModuleScript" referent="RBX00000002"><Properties><string name="Name">RGB</string><ProtectedString name="Source"><![CDATA[--[[
+	RGB — deixa qualquer texto (ou borda/fundo) com efeito arco-íris.
+
+	Uso (funciona no servidor E no cliente):
+		local RGB = require(ReplicatedStorage.Shared.RGB)
+		RGB.Apply(meuTextLabel)                -- gradiente arco-íris que "anda"
+		RGB.Apply(meuTextLabel, "Rainbow")     -- cor única que troca com o tempo
+		RGB.Apply(meuUIStroke, "Rainbow", 0.5) -- borda RGB, mais rápida
+		RGB.Remove(meuTextLabel)
+
+	O efeito é animado só no cliente (RGB.Start(), chamado pelo RGBController).
+	Como usa tags (CollectionService), dá pra marcar textos pelo servidor
+	também, e eles ficam RGB para todo mundo (ex.: títulos em cima da cabeça).
+
+	Também dá pra fazer sem código no Studio: coloque a tag "RGBText" em
+	qualquer TextLabel/TextButton/UIStroke/Frame. Atributos opcionais:
+		RGBMode  = "Gradient" | "Rainbow"
+		RGBSpeed = número (padrão 0.25 = uma volta a cada 4s)
+]]
+
+local CollectionService = game:GetService("CollectionService")
+local RunService = game:GetService("RunService")
+
+local RGB = {}
+
+RGB.TagName = "RGBText"
+RGB.DefaultSpeed = 0.25
+RGB.Saturation = 0.85
+RGB.Value = 1
+
+local GRADIENT_NAME = "_RGBGradient"
+local KEYPOINTS = 6
+local GRADIENT_SPREAD = 0.5 -- quanto do arco-íris aparece ao mesmo tempo no gradiente
+
+function RGB.Apply(obj: Instance, mode: string?, speed: number?)
+	obj:SetAttribute("RGBMode", mode or "Gradient")
+	if speed then
+		obj:SetAttribute("RGBSpeed", speed)
+	end
+	CollectionService:AddTag(obj, RGB.TagName)
+	return obj
+end
+
+function RGB.Remove(obj: Instance)
+	CollectionService:RemoveTag(obj, RGB.TagName)
+	local gradient = obj:FindFirstChild(GRADIENT_NAME)
+	if gradient then
+		gradient:Destroy()
+	end
+end
+
+-- Cor RGB "atual" — útil para efeitos (partículas, luzes, rastros)
+function RGB.Now(offset: number?, speed: number?): Color3
+	local hue = (os.clock() * (speed or RGB.DefaultSpeed) + (offset or 0)) % 1
+	return Color3.fromHSV(hue, RGB.Saturation, RGB.Value)
+end
+
+local function buildSequence(hue: number): ColorSequence
+	local points = table.create(KEYPOINTS + 1)
+	for i = 0, KEYPOINTS do
+		local alpha = i / KEYPOINTS
+		local color = Color3.fromHSV((hue + alpha * GRADIENT_SPREAD) % 1, RGB.Saturation, RGB.Value)
+		points[i + 1] = ColorSequenceKeypoint.new(alpha, color)
+	end
+	return ColorSequence.new(points)
+end
+
+local function isText(obj: Instance): boolean
+	return obj:IsA("TextLabel") or obj:IsA("TextButton") or obj:IsA("TextBox")
+end
+
+local function update(obj: any, now: number, sequenceCache)
+	local mode = obj:GetAttribute("RGBMode") or "Gradient"
+	local speed = obj:GetAttribute("RGBSpeed") or RGB.DefaultSpeed
+	local hue = (now * speed) % 1
+
+	if mode == "Rainbow" then
+		local color = Color3.fromHSV(hue, RGB.Saturation, RGB.Value)
+		if isText(obj) then
+			obj.TextColor3 = color
+		elseif obj:IsA("UIStroke") then
+			obj.Color = color
+		elseif obj:IsA("GuiObject") then
+			obj.BackgroundColor3 = color
+		elseif obj:IsA("BasePart") then
+			obj.Color = color
+		end
+	else -- "Gradient"
+		local gradient = obj:FindFirstChild(GRADIENT_NAME)
+		if not gradient then
+			gradient = Instance.new("UIGradient")
+			gradient.Name = GRADIENT_NAME
+			gradient.Parent = obj
+			-- o gradiente multiplica a cor original, então deixamos branco
+			if isText(obj) then
+				obj.TextColor3 = Color3.new(1, 1, 1)
+			elseif obj:IsA("UIStroke") then
+				obj.Color = Color3.new(1, 1, 1)
+			elseif obj:IsA("GuiObject") then
+				obj.BackgroundColor3 = Color3.new(1, 1, 1)
+			end
+		end
+		local sequence = sequenceCache[speed]
+		if not sequence then
+			sequence = buildSequence(hue)
+			sequenceCache[speed] = sequence
+		end
+		gradient.Color = sequence
+	end
+end
+
+local started = false
+
+-- Liga a animação. Só roda no cliente (o RGBController já chama isso).
+function RGB.Start()
+	if started or not RunService:IsClient() then
+		return
+	end
+	started = true
+
+	RunService.RenderStepped:Connect(function()
+		local now = os.clock()
+		local sequenceCache = {} -- uma sequência por velocidade por frame
+		for _, obj in ipairs(CollectionService:GetTagged(RGB.TagName)) do
+			update(obj, now, sequenceCache)
+		end
+	end)
+end
+
+return RGB
+]]></ProtectedString></Properties></Item><Item class="ModuleScript" referent="RBX00000003"><Properties><string name="Name">UIKit</string><ProtectedString name="Source"><![CDATA[--[[
+	UIKit — atalhos para montar interface por código, com o mesmo visual em tudo.
+]]
+
+local TweenService = game:GetService("TweenService")
+
+local UIKit = {}
+
+UIKit.Theme = {
+	Background = Color3.fromRGB(14, 14, 22),
+	Panel = Color3.fromRGB(24, 24, 36),
+	PanelLight = Color3.fromRGB(36, 36, 54),
+	PanelLighter = Color3.fromRGB(50, 50, 74),
+	Text = Color3.fromRGB(240, 240, 250),
+	SubText = Color3.fromRGB(160, 160, 190),
+	Good = Color3.fromRGB(60, 200, 110),
+	Bad = Color3.fromRGB(220, 70, 80),
+	Info = Color3.fromRGB(70, 130, 255),
+	Gold = Color3.fromRGB(255, 205, 60),
+	Locked = Color3.fromRGB(70, 70, 90),
+
+	FontTitle = Enum.Font.GothamBlack,
+	FontBold = Enum.Font.GothamBold,
+	Font = Enum.Font.GothamMedium,
+}
+
+-- UIKit.new("Frame", { Size = ..., Parent = ... }, { filhos })
+function UIKit.new(className: string, props: { [string]: any }?, children: { Instance }?)
+	local obj: any = Instance.new(className)
+	local parent = nil
+	for key, value in pairs(props or {}) do
+		if key == "Parent" then
+			parent = value
+		else
+			obj[key] = value
+		end
+	end
+	for _, child in ipairs(children or {}) do
+		child.Parent = obj
+	end
+	if parent then
+		obj.Parent = parent
+	end
+	return obj
+end
+
+function UIKit.Corner(radius: number?)
+	return UIKit.new("UICorner", { CornerRadius = UDim.new(0, radius or 12) })
+end
+
+function UIKit.Stroke(color: Color3?, thickness: number?, transparency: number?)
+	return UIKit.new("UIStroke", {
+		Color = color or Color3.new(0, 0, 0),
+		Thickness = thickness or 2,
+		Transparency = transparency or 0,
+		ApplyStrokeMode = Enum.ApplyStrokeMode.Border,
+	})
+end
+
+-- Contorno do texto (deixa legível em qualquer fundo)
+function UIKit.TextStroke(thickness: number?)
+	return UIKit.new("UIStroke", {
+		Color = Color3.new(0, 0, 0),
+		Thickness = thickness or 1.5,
+		Transparency = 0.2,
+		ApplyStrokeMode = Enum.ApplyStrokeMode.Contextual,
+	})
+end
+
+function UIKit.Padding(px: number)
+	return UIKit.new("UIPadding", {
+		PaddingTop = UDim.new(0, px),
+		PaddingBottom = UDim.new(0, px),
+		PaddingLeft = UDim.new(0, px),
+		PaddingRight = UDim.new(0, px),
+	})
+end
+
+function UIKit.Label(props: { [string]: any })
+	local defaults = {
+		BackgroundTransparency = 1,
+		Font = UIKit.Theme.FontBold,
+		TextColor3 = UIKit.Theme.Text,
+		TextSize = 18,
+		TextXAlignment = Enum.TextXAlignment.Left,
+	}
+	for key, value in pairs(props) do
+		defaults[key] = value
+	end
+	return UIKit.new("TextLabel", defaults)
+end
+
+function UIKit.Tween(obj: Instance, time: number, goal: { [string]: any }, style: Enum.EasingStyle?, direction: Enum.EasingDirection?)
+	local tween = TweenService:Create(
+		obj,
+		TweenInfo.new(time, style or Enum.EasingStyle.Quint, direction or Enum.EasingDirection.Out),
+		goal
+	)
+	tween:Play()
+	return tween
+end
+
+-- Botão arredondado com animação de hover/clique
+function UIKit.Button(props: { [string]: any }, onClick: (() -> ())?)
+	local defaults = {
+		AutoButtonColor = false,
+		BackgroundColor3 = UIKit.Theme.PanelLighter,
+		Font = UIKit.Theme.FontBold,
+		TextColor3 = UIKit.Theme.Text,
+		TextSize = 18,
+	}
+	for key, value in pairs(props) do
+		defaults[key] = value
+	end
+	local button = UIKit.new("TextButton", defaults, { UIKit.Corner(10) })
+	local scale = UIKit.new("UIScale", { Parent = button })
+
+	button.MouseEnter:Connect(function()
+		UIKit.Tween(scale, 0.15, { Scale = 1.05 })
+	end)
+	button.MouseLeave:Connect(function()
+		UIKit.Tween(scale, 0.15, { Scale = 1 })
+	end)
+	button.MouseButton1Down:Connect(function()
+		UIKit.Tween(scale, 0.08, { Scale = 0.94 })
+	end)
+	button.MouseButton1Up:Connect(function()
+		UIKit.Tween(scale, 0.15, { Scale = 1.05 })
+	end)
+	if onClick then
+		button.Activated:Connect(onClick)
+	end
+	return button
+end
+
+-- 1250 -> "1.250"
+function UIKit.FormatNumber(n: number): string
+	local s = tostring(math.floor(n))
+	local formatted = s:reverse():gsub("(%d%d%d)", "%1."):reverse()
+	if formatted:sub(1, 1) == "." then
+		formatted = formatted:sub(2)
+	end
+	return formatted
+end
+
+return UIKit
+]]></ProtectedString></Properties></Item></Item></roblox>

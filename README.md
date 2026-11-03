@@ -10,7 +10,21 @@
 - **Interface**: HUD de nível, barra de XP e moedas; janelas da loja e das conquistas com blur; "+XP" flutuando; LEVEL UP gigante; avisos de conquista. Tudo com texto RGB.
 - **Leaderboard** do Roblox com Nível, Kills e Vitórias.
 
-## Onde fica cada coisa no Studio
+## Instalação rápida (recomendado)
+
+Baixe os 3 arquivos da pasta [`build/`](build). No Studio, clique com o botão direito no lugar indicado → **Insert from File...** e escolha o arquivo:
+
+| Arquivo | Clique com o botão direito em |
+|---|---|
+| `1_Shared_ReplicatedStorage.rbxmx` | **ReplicatedStorage** |
+| `2_Progression_ServerScriptService.rbxmx` | **ServerScriptService** |
+| `3_StarterPlayerScripts.rbxmx` | **StarterPlayer > StarterPlayerScripts** |
+
+Antes de importar, apague as versões antigas (pastas `Shared` e `Progression`, e os LocalScripts `ProgressionUI` e `RGBController`).
+
+Para regerar os arquivos depois de mudar o código: `python3 tools/build_rbxmx.py`.
+
+## Onde fica cada coisa no Studio (instalação manual)
 
 | Arquivo | Tipo | Onde colocar |
 |---|---|---|

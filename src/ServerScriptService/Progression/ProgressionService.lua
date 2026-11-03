@@ -15,12 +15,32 @@ local BadgeService = game:GetService("BadgeService")
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
-local Shared = ReplicatedStorage:WaitForChild("Shared")
-local Config = require(Shared:WaitForChild("Config"))
-local RGB = require(Shared:WaitForChild("RGB"))
+-- Acha um filho pelo nome, ignorando espaços sobrando e maiúsculas/minúsculas
+local function findChild(parent: Instance, name: string): Instance
+	local target = name:lower()
+	local started = os.clock()
+	local warned = false
+	while true do
+		for _, child in ipairs(parent:GetChildren()) do
+			local clean = child.Name:gsub("^%s+", ""):gsub("%s+$", "")
+			if clean:lower() == target then
+				return child
+			end
+		end
+		if not warned and os.clock() - started > 5 then
+			warned = true
+			warn(("[Progression] Esperando '%s' dentro de %s... confira se ele existe e está no lugar certo."):format(name, parent:GetFullName()))
+		end
+		task.wait(0.1)
+	end
+end
 
-local DataService = require(script.Parent:WaitForChild("DataService"))
-local GearService = require(script.Parent:WaitForChild("GearService"))
+local Shared = findChild(ReplicatedStorage, "Shared")
+local Config = require(findChild(Shared, "Config"))
+local RGB = require(findChild(Shared, "RGB"))
+
+local DataService = require(findChild(script.Parent, "DataService"))
+local GearService = require(findChild(script.Parent, "GearService"))
 
 local Progression = {}
 
@@ -59,22 +79,31 @@ end
 ---------------------------------------------------------------------
 -- Leaderstats + título em cima da cabeça
 ---------------------------------------------------------------------
-local function createLeaderstats(player: Player, data)
-	local leaderstats = Instance.new("Folder")
-	leaderstats.Name = "leaderstats"
+-- Se o jogo já tiver um leaderstats (de outro script), usamos o mesmo
+local LEADERSTATS = { { "Nível", "Level" }, { "Kills", "Kills" }, { "Vitórias", "Wins" } }
 
-	for _, info in ipairs({
-		{ "Nível", data.Level },
-		{ "Kills", data.Kills },
-		{ "Vitórias", data.Wins },
-	}) do
-		local value = Instance.new("IntValue")
-		value.Name = info[1]
-		value.Value = info[2]
-		value.Parent = leaderstats
+local function createLeaderstats(player: Player, data)
+	local leaderstats = player:FindFirstChild("leaderstats")
+	local created = false
+	if not leaderstats then
+		leaderstats = Instance.new("Folder")
+		leaderstats.Name = "leaderstats"
+		created = true
 	end
 
-	leaderstats.Parent = player
+	for _, info in ipairs(LEADERSTATS) do
+		local value = leaderstats:FindFirstChild(info[1])
+		if not (value and value:IsA("IntValue")) then
+			value = Instance.new("IntValue")
+			value.Name = info[1]
+			value.Parent = leaderstats
+		end
+		value.Value = data[info[2]]
+	end
+
+	if created then
+		leaderstats.Parent = player
+	end
 end
 
 local function updateLeaderstats(player: Player, data)
@@ -82,9 +111,12 @@ local function updateLeaderstats(player: Player, data)
 	if not leaderstats then
 		return
 	end
-	leaderstats["Nível"].Value = data.Level
-	leaderstats.Kills.Value = data.Kills
-	leaderstats["Vitórias"].Value = data.Wins
+	for _, info in ipairs(LEADERSTATS) do
+		local value = leaderstats:FindFirstChild(info[1])
+		if value and value:IsA("IntValue") then
+			value.Value = data[info[2]]
+		end
+	end
 end
 
 local function teamColor(player: Player): Color3
