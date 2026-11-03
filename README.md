@@ -30,6 +30,8 @@ Ou use o [Rojo](https://rojo.space): `rojo serve` nesta pasta e conecte pelo plu
 
 ## Colocando as Periastrons na loja
 
+As Periastrons, a Illumina e a Darkheart já vêm com `AssetId` preenchido: o servidor baixa o gear oficial sozinho, sem precisar da Toolbox. Se algum não carregar, aparece um aviso `[GearService]` no Output. Aí é só corrigir o número em `Config.lua`.
+
 Os itens ficam em `Config.ShopItems`. Para cada um, escolha **uma** destas opções:
 
 1. **Pela Toolbox (mais confiável):** crie a pasta `ServerStorage > ShopItems`, coloque o Tool do gear lá dentro e renomeie com o `Id` do item (ex.: `PeriAlpha`).

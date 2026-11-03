@@ -76,18 +76,19 @@ end
 ]]
 Config.ShopItems = {
 	-- Periastrons (espadas com habilidade especial)
-	{ Id = "PeriAlpha",   Name = "Periastron Alpha",   Price = 1500,  MinLevel = 3,  AssetId = 0, Color = Color3.fromRGB(255, 70, 70) },
-	{ Id = "PeriBeta",    Name = "Periastron Beta",    Price = 2500,  MinLevel = 6,  AssetId = 0, Color = Color3.fromRGB(80, 220, 110) },
-	{ Id = "PeriGamma",   Name = "Periastron Gamma",   Price = 4000,  MinLevel = 10, AssetId = 0, Color = Color3.fromRGB(70, 140, 255) },
-	{ Id = "PeriDelta",   Name = "Periastron Delta",   Price = 6000,  MinLevel = 15, AssetId = 0, Color = Color3.fromRGB(240, 240, 255) },
-	{ Id = "PeriEpsilon", Name = "Periastron Epsilon", Price = 9000,  MinLevel = 22, AssetId = 0, Color = Color3.fromRGB(220, 80, 255) },
-	{ Id = "PeriOmega",   Name = "Periastron Omega",   Price = 25000, MinLevel = 50, AssetId = 0, Color = Color3.fromRGB(255, 200, 40), Rainbow = true },
+	-- IDs tirados de listas de gear da internet: se algum não carregar,
+	-- confira o número na URL do item no catálogo do Roblox.
+	{ Id = "PeriAlpha",   Name = "Azure Periastron Alpha",       Price = 1500,  MinLevel = 3,  AssetId = 69499437,  Color = Color3.fromRGB(70, 140, 255) },
+	{ Id = "PeriBeta",    Name = "Grimgold Periastron Beta",     Price = 2500,  MinLevel = 6,  AssetId = 73829193,  Color = Color3.fromRGB(230, 180, 40) },
+	{ Id = "PeriGamma",   Name = "Chartreuse Periastron Gamma",  Price = 4000,  MinLevel = 10, AssetId = 80661504,  Color = Color3.fromRGB(170, 255, 60) },
+	{ Id = "PeriEpsilon", Name = "Joyful Periastron Epsilon",    Price = 9000,  MinLevel = 22, AssetId = 233520257, Color = Color3.fromRGB(255, 120, 200) },
+	{ Id = "PeriOmega",   Name = "Rainbow Periastron Omega",     Price = 25000, MinLevel = 50, AssetId = 159229806, Color = Color3.fromRGB(255, 200, 40), Rainbow = true },
 
 	-- Outras espadas clássicas
-	{ Id = "Illumina",    Name = "Illumina",           Price = 3000,  MinLevel = 8,  AssetId = 0, Color = Color3.fromRGB(255, 245, 170) },
-	{ Id = "Darkheart",   Name = "Darkheart",          Price = 3000,  MinLevel = 8,  AssetId = 0, Color = Color3.fromRGB(110, 60, 150) },
-	{ Id = "Venomshank",  Name = "Venomshank",         Price = 2000,  MinLevel = 5,  AssetId = 0, Color = Color3.fromRGB(150, 255, 60) },
-	{ Id = "Firebrand",   Name = "Firebrand",          Price = 2000,  MinLevel = 5,  AssetId = 0, Color = Color3.fromRGB(255, 130, 30) },
+	{ Id = "Illumina",    Name = "Illumina",           Price = 3000,  MinLevel = 8,  AssetId = 16641274, Color = Color3.fromRGB(255, 245, 170) },
+	{ Id = "Darkheart",   Name = "Darkheart",          Price = 3000,  MinLevel = 8,  AssetId = 16895215, Color = Color3.fromRGB(110, 60, 150) },
+	{ Id = "Venomshank",  Name = "Venomshank",         Price = 2000,  MinLevel = 5,  AssetId = 0,        Color = Color3.fromRGB(150, 255, 60) }, -- coloque o ID
+	{ Id = "Firebrand",   Name = "Firebrand",          Price = 2000,  MinLevel = 5,  AssetId = 0,        Color = Color3.fromRGB(255, 130, 30) }, -- coloque o ID
 }
 
 function Config.GetShopItem(id: string)
