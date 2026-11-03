@@ -264,20 +264,25 @@ local RoundConfig = {}
 -- MAPA
 ---------------------------------------------------------------------
 --[[
-	Se o seu mapa (torres + chão) estiver dentro de um Model/Folder no
-	Workspace, coloque o nome dele aqui (ex.: "Map"). O sistema guarda uma
-	cópia no começo do servidor e reconstrói o mapa a cada rodada.
+	Nome do Model/Folder que tem as torres (pode estar em qualquer lugar do
+	Workspace). O sistema guarda uma cópia do que tem dentro dele no começo
+	do servidor e reconstrói a cada rodada (Scripts e "GameValues" ficam).
 
 	Se deixar "" (ou não achar), ele usa TUDO que está no Workspace,
 	menos Terrain, câmera e personagens.
 ]]
-RoundConfig.MapName = ""
+RoundConfig.MapName = "Doomspires"
 
 -- Coisas do Workspace que NUNCA devem ser apagadas/reconstruídas
 RoundConfig.IgnoreInWorkspace = { "Camera", "Terrain" }
 
 -- Se o SpawnLocation de um time cair mais que isso (studs), a torre "caiu"
 RoundConfig.SpawnFallTolerance = 15
+-- Se o SpawnLocation for arremessado pra longe do mapa (studs), também conta como caído
+RoundConfig.SpawnFlungDistance = 500
+
+-- Chama MakeJoints depois de reconstruir (as torres do Doomspire precisam disso)
+RoundConfig.MakeJointsAfterRegen = true
 
 ---------------------------------------------------------------------
 -- TEMPOS (segundos)

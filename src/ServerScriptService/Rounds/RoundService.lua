@@ -232,6 +232,23 @@ local function publishTeams()
 	setState("PlayersLeft", left)
 end
 
+-- Compatibilidade com a interface do jogo (Remotes.ChangeTeam / RequestSpectator)
+local function gameRemote(name: string): RemoteEvent?
+	local folder = ReplicatedStorage:FindFirstChild("Remotes")
+	local remote = folder and folder:FindFirstChild(name)
+	if remote and remote:IsA("RemoteEvent") then
+		return remote
+	end
+	return nil
+end
+
+local function notifyTeamChange(player: Player)
+	local remote = gameRemote("ChangeTeam")
+	if remote then
+		remote:FireClient(player, player.TeamColor)
+	end
+end
+
 local function assignTeams()
 	local teams = towerTeams()
 	local players = Players:GetPlayers()
@@ -257,6 +274,7 @@ local function assignTeams()
 	for index, player in ipairs(players) do
 		player.Neutral = false
 		player.Team = teams[((index - 1) % #teams) + 1]
+		notifyTeamChange(player)
 	end
 end
 
@@ -276,6 +294,7 @@ local function assignLateJoiner(player: Player)
 	if best then
 		player.Neutral = false
 		player.Team = best
+		notifyTeamChange(player)
 	end
 end
 
@@ -630,6 +649,10 @@ local function intermission()
 	setPhase("Intermission", RoundConfig.IntermissionTime)
 
 	MapService.Regenerate()
+	local reset = gameRemote("RequestSpectator")
+	if reset then
+		reset:FireAllClients("GameReset") -- tira todo mundo do modo espectador do jogo
+	end
 	mode = RoundConfig.Modes[1]
 	assignTeams()
 	for _, player in ipairs(Players:GetPlayers()) do

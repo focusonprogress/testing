@@ -59,16 +59,29 @@ end
 
 local function getContainer(): Instance?
 	if RoundConfig.MapName ~= "" then
-		return workspace:FindFirstChild(RoundConfig.MapName)
+		return workspace:FindFirstChild(RoundConfig.MapName, true)
 	end
 	return nil
+end
+
+-- No modo "container", reconstrói os filhos dele, menos scripts e valores do jogo
+local function keepInContainer(obj: Instance): boolean
+	return obj:IsA("BaseScript") or obj:IsA("ModuleScript") or obj.Name == "GameValues"
 end
 
 -- Raízes do mapa que estão no Workspace agora
 function MapService.GetRoots(): { Instance }
 	if usingContainer then
 		local container = getContainer()
-		return container and { container } or {}
+		local roots = {}
+		if container then
+			for _, child in ipairs(container:GetChildren()) do
+				if not keepInContainer(child) then
+					table.insert(roots, child)
+				end
+			end
+		end
+		return roots
 	end
 	local roots = {}
 	for _, child in ipairs(workspace:GetChildren()) do
@@ -147,9 +160,36 @@ function MapService.Regenerate()
 			root:Destroy()
 		end)
 	end
-	for _, copy in ipairs(backup:GetChildren()) do
-		copy:Clone().Parent = workspace
+	local destination = usingContainer and getContainer() or workspace
+	if not destination then
+		warn("[Rounds] O mapa '" .. RoundConfig.MapName .. "' sumiu do Workspace! Reconstruindo direto no Workspace.")
+		destination = workspace
 	end
+	for _, copy in ipairs(backup:GetChildren()) do
+		copy:Clone().Parent = destination
+	end
+
+	-- gruda os tijolos de novo (as torres do Doomspire usam juntas de superfície)
+	if RoundConfig.MakeJointsAfterRegen then
+		for _, root in ipairs(MapService.GetRoots()) do
+			if root:IsA("Model") or root:IsA("BasePart") then
+				pcall(function()
+					local target: any = root
+					target:MakeJoints()
+				end)
+			else
+				for _, child in ipairs(root:GetDescendants()) do
+					if child:IsA("Model") and child.Parent == root then
+						pcall(function()
+							local target: any = child
+							target:MakeJoints()
+						end)
+					end
+				end
+			end
+		end
+	end
+
 	MapService.Scan()
 end
 
@@ -159,9 +199,16 @@ end
 
 local function spawnAlive(record): boolean
 	local spawn = record.Spawn
-	return spawn.Parent ~= nil
-		and spawn:IsDescendantOf(workspace)
-		and spawn.Position.Y > record.OriginY - RoundConfig.SpawnFallTolerance
+	if spawn.Parent == nil or not spawn:IsDescendantOf(workspace) then
+		return false
+	end
+	if spawn.Position.Y < record.OriginY - RoundConfig.SpawnFallTolerance then
+		return false
+	end
+	-- arremessado pra longe (o GameControl antigo também checava isso)
+	local center = MapService.Info.Center
+	local flat = Vector3.new(spawn.Position.X - center.X, 0, spawn.Position.Z - center.Z)
+	return flat.Magnitude < MapService.Info.Radius + RoundConfig.SpawnFlungDistance
 end
 
 function MapService.GetAliveSpawns(): { SpawnLocation }
