@@ -32,7 +32,7 @@ RoundConfig.MakeJointsAfterRegen = true
 ---------------------------------------------------------------------
 -- TEMPOS (segundos)
 ---------------------------------------------------------------------
-RoundConfig.MinPlayers = 2 -- no Studio é sempre 1 (pra você testar sozinho)
+RoundConfig.MinPlayers = 1 -- quantos jogadores precisa pra rodada começar
 RoundConfig.IntermissionTime = 20
 RoundConfig.EndingTime = 8
 RoundConfig.RespawnTime = 3

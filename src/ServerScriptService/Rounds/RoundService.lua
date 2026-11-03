@@ -736,8 +736,9 @@ local function playRound()
 	spawnAll() -- todo mundo renasce na torre, com as armas
 	announce("RoundStart", { Mode = mode.Id })
 
-	-- Sozinho (ex.: testando no Studio) a rodada só acaba se você for eliminado ou pelo tempo
-	local soloTest = #standing() <= 1
+	-- Sozinho a rodada só acaba se você for eliminado ou pelo tempo.
+	-- Assim que tiver 2 lados na disputa (ex.: alguém entrou), vale a regra normal.
+	local multiSide = #standing() > 1
 
 	local shrinkStarted = false
 	local nextRandomAt = RoundConfig.FirstRandomEventAt
@@ -790,11 +791,12 @@ local function playRound()
 
 		-- quem ainda está vivo na disputa?
 		local sides = standing()
-		if soloTest then
-			if #sides == 0 then
-				return finishRound(nil)
-			end
-		elseif #sides <= 1 then
+		if #sides > 1 then
+			multiSide = true
+		end
+		if #sides == 0 then
+			return finishRound(nil)
+		elseif multiSide and #sides == 1 then
 			return finishRound(sides[1])
 		end
 
