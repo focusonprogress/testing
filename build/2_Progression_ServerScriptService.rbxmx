@@ -1,4 +1,4 @@
-<roblox xmlns:xmime="http://www.w3.org/2005/05/xmlmime" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://www.roblox.com/roblox.xsd" version="4"><Item class="Folder" referent="RBX00000009"><Properties><string name="Name">Progression</string></Properties><Item class="ModuleScript" referent="RBX00000005"><Properties><string name="Name">DataService</string><ProtectedString name="Source"><![CDATA[--[[
+<roblox xmlns:xmime="http://www.w3.org/2005/05/xmlmime" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://www.roblox.com/roblox.xsd" version="4"><Item class="Folder" referent="RBX0000000A"><Properties><string name="Name">Progression</string></Properties><Item class="ModuleScript" referent="RBX00000006"><Properties><string name="Name">DataService</string><ProtectedString name="Source"><![CDATA[--[[
 	DataService — carrega e salva o progresso dos jogadores com DataStore.
 
 	No Studio: Game Settings > Security > "Enable Studio Access to API Services"
@@ -169,7 +169,7 @@ game:BindToClose(function()
 end)
 
 return DataService
-]]></ProtectedString></Properties></Item><Item class="ModuleScript" referent="RBX00000006"><Properties><string name="Name">GearService</string><ProtectedString name="Source"><![CDATA[--[[
+]]></ProtectedString></Properties></Item><Item class="ModuleScript" referent="RBX00000007"><Properties><string name="Name">GearService</string><ProtectedString name="Source"><![CDATA[--[[
 	GearService — acha o Tool de cada item da loja e entrega para o jogador.
 
 	Ordem de busca:
@@ -309,7 +309,7 @@ function GearService.Give(player: Player, itemId: string)
 end
 
 return GearService
-]]></ProtectedString></Properties></Item><Item class="Script" referent="RBX00000007"><Properties><string name="Name">Main</string><ProtectedString name="Source"><![CDATA[-- Liga o sistema de progressão (dados, XP, níveis, loja, conquistas).
+]]></ProtectedString></Properties></Item><Item class="Script" referent="RBX00000008"><Properties><string name="Name">Main</string><ProtectedString name="Source"><![CDATA[-- Liga o sistema de progressão (dados, XP, níveis, loja, conquistas).
 -- Acha um filho pelo nome, ignorando espaços sobrando e maiúsculas/minúsculas
 local function findChild(parent: Instance, name: string): Instance
 	local target = name:lower()
@@ -332,7 +332,7 @@ end
 
 local Progression = require(findChild(script.Parent, "ProgressionService"))
 Progression.Init()
-]]></ProtectedString></Properties></Item><Item class="ModuleScript" referent="RBX00000008"><Properties><string name="Name">ProgressionService</string><ProtectedString name="Source"><![CDATA[--[[
+]]></ProtectedString></Properties></Item><Item class="ModuleScript" referent="RBX00000009"><Properties><string name="Name">ProgressionService</string><ProtectedString name="Source"><![CDATA[--[[
 	ProgressionService — XP, níveis, títulos, moedas, kills, vitórias,
 	conquistas e loja.
 

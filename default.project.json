@@ -10,6 +10,9 @@
     "ServerScriptService": {
       "Progression": {
         "$path": "src/ServerScriptService/Progression"
+      },
+      "Rounds": {
+        "$path": "src/ServerScriptService/Rounds"
       }
     },
     "StarterPlayer": {

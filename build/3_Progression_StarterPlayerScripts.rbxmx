@@ -1,4 +1,4 @@
-<roblox xmlns:xmime="http://www.w3.org/2005/05/xmlmime" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://www.roblox.com/roblox.xsd" version="4"><Item class="LocalScript" referent="RBX0000000A"><Properties><string name="Name">ProgressionUI</string><ProtectedString name="Source"><![CDATA[--[[
+<roblox xmlns:xmime="http://www.w3.org/2005/05/xmlmime" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://www.roblox.com/roblox.xsd" version="4"><Item class="LocalScript" referent="RBX0000000B"><Properties><string name="Name">ProgressionUI</string><ProtectedString name="Source"><![CDATA[--[[
 	ProgressionUI — HUD de nível/XP/moedas, loja de gears, conquistas e
 	notificações (recompensa, level up, conquista). Tudo com texto RGB.
 	A interface é montada por código, então não precisa criar nada no StarterGui.
@@ -1034,7 +1034,7 @@ task.spawn(function()
 		refreshAll()
 	end
 end)
-]]></ProtectedString></Properties></Item><Item class="LocalScript" referent="RBX0000000B"><Properties><string name="Name">RGBController</string><ProtectedString name="Source"><![CDATA[-- Anima todos os textos marcados como RGB (interface, títulos em cima da cabeça etc.)
+]]></ProtectedString></Properties></Item><Item class="LocalScript" referent="RBX0000000C"><Properties><string name="Name">RGBController</string><ProtectedString name="Source"><![CDATA[-- Anima todos os textos marcados como RGB (interface, títulos em cima da cabeça etc.)
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 -- Acha um filho pelo nome, ignorando espaços sobrando e maiúsculas/minúsculas

@@ -19,6 +19,10 @@ def write(fn, items):
     open(os.path.join(root,'build',fn),'w',encoding='utf-8').write(doc)
     print(fn, len(doc))
 files=lambda d: sorted(glob.glob(os.path.join(root,'src',d,'*.lua')))
+ps=lambda *names: [os.path.join(root,'src','StarterPlayer','StarterPlayerScripts',n+'.client.lua') for n in names]
+for old in glob.glob(os.path.join(root,'build','*.rbxmx')): os.remove(old)
 write('1_Shared_ReplicatedStorage.rbxmx',[folder('Shared',[script(f) for f in files('ReplicatedStorage/Shared')])])
 write('2_Progression_ServerScriptService.rbxmx',[folder('Progression',[script(f) for f in files('ServerScriptService/Progression')])])
-write('3_StarterPlayerScripts.rbxmx',[script(f) for f in files('StarterPlayer/StarterPlayerScripts')])
+write('3_Progression_StarterPlayerScripts.rbxmx',[script(f) for f in ps('ProgressionUI','RGBController')])
+write('4_Rounds_ServerScriptService.rbxmx',[folder('Rounds',[script(f) for f in files('ServerScriptService/Rounds')])])
+write('5_RoundUI_StarterPlayerScripts.rbxmx',[script(f) for f in ps('RoundUI')])

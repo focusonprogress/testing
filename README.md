@@ -18,7 +18,9 @@ Baixe os 3 arquivos da pasta [`build/`](build). No Studio, clique com o botão d
 |---|---|
 | `1_Shared_ReplicatedStorage.rbxmx` | **ReplicatedStorage** |
 | `2_Progression_ServerScriptService.rbxmx` | **ServerScriptService** |
-| `3_StarterPlayerScripts.rbxmx` | **StarterPlayer > StarterPlayerScripts** |
+| `3_Progression_StarterPlayerScripts.rbxmx` | **StarterPlayer > StarterPlayerScripts** |
+| `4_Rounds_ServerScriptService.rbxmx` | **ServerScriptService** |
+| `5_RoundUI_StarterPlayerScripts.rbxmx` | **StarterPlayer > StarterPlayerScripts** |
 
 Antes de importar, apague as versões antigas (pastas `Shared` e `Progression`, e os LocalScripts `ProgressionUI` e `RGBController`).
 
@@ -79,3 +81,18 @@ RGB.Apply(meuUIStroke, "Rainbow", 0.5) -- borda RGB mais rápida
 ```
 
 Sem código: coloque a tag `RGBText` (Tag Editor) em qualquer TextLabel, TextButton, UIStroke ou Frame.
+
+## Rodadas e eventos 🌋
+
+**Ciclo:** Aguardando jogadores → Intermissão (20s: mapa reconstruído, sem armas, votação de modo) → Partida → Fim (vencedor, MVP, recompensas).
+
+- **Times e torres:** cada time é ligado à sua torre pelo SpawnLocation com o mesmo TeamColor. Se o spawn cair (ou for destruído), o time não renasce mais. O time perde quando não sobra ninguém vivo.
+- **Modos (votados):** Clássico, Todos contra todos (3 vidas), Só espadas e Caos (um evento atrás do outro).
+- **Encolhimento (um por rodada, aos 1:30):** lava subindo, torres derretendo, bordas desmoronando ou nuvem tóxica.
+- **Eventos aleatórios:** meteoros, bombas, gravidade baixa, super velocidade, apagão, duelo de espadas, tijolo dourado e caça ao rei.
+- **Morte súbita (6:00):** sem respawn e tudo 2x mais rápido. Aos 10:00 acaba por tempo.
+- **Interface RGB:** barra do topo (fase, tempo, times vivos, eventos), anúncios, votação, killfeed e tela de vitória.
+
+**Importante:** o sistema controla o respawn sozinho (`CharacterAutoLoads = false`). Desligue os scripts do jogo que fazem rodada, regen ou respawn (ex.: `GameControl` e `RegenControl`): selecione o script → Properties → marque **Disabled** (ou **Enabled** desmarcado).
+
+Tudo se ajusta em `Shared > RoundConfig` (tempos, modos, eventos, dano da lava...). Se o mapa estiver dentro de um Model, coloque o nome dele em `RoundConfig.MapName`. Se não estiver, o sistema reconstrói o Workspace inteiro.
