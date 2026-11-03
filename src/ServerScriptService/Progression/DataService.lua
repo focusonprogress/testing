@@ -9,6 +9,7 @@
 local DataStoreService = game:GetService("DataStoreService")
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local RunService = game:GetService("RunService")
 
 local Config = require(ReplicatedStorage:WaitForChild("Shared"):WaitForChild("Config"))
 
@@ -55,14 +56,15 @@ end
 
 local function withRetries(label: string, fn: () -> any): (boolean, any)
 	local lastErr
-	for attempt = 1, 4 do
+	local maxAttempts = RunService:IsStudio() and 1 or 4 -- no Studio falha rápido
+	for attempt = 1, maxAttempts do
 		local ok, result = pcall(fn)
 		if ok then
 			return true, result
 		end
 		lastErr = result
 		warn(("[DataService] %s falhou (tentativa %d): %s"):format(label, attempt, tostring(result)))
-		if attempt < 4 then
+		if attempt < maxAttempts then
 			task.wait(2 ^ attempt)
 		end
 	end
@@ -79,6 +81,12 @@ function DataService.Load(player: Player)
 		return store:GetAsync(keyFor(player))
 	end)
 
+	if not ok and RunService:IsStudio() then
+		warn("[DataService] Sem acesso ao DataStore no Studio: jogando SEM salvar. Ligue 'Enable Studio Access to API Services' em Game Settings > Security.")
+		store = nil
+		profiles[player] = template()
+		return profiles[player]
+	end
 	if not ok then
 		-- Melhor expulsar do que deixar jogar e sobrescrever o save com dados zerados
 		player:Kick("Não conseguimos carregar seu progresso. Entre de novo em alguns instantes!")

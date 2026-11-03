@@ -14,7 +14,8 @@ local Config = require(Shared:WaitForChild("Config"))
 local RGB = require(Shared:WaitForChild("RGB"))
 local UIKit = require(Shared:WaitForChild("UIKit"))
 
-local Remotes = ReplicatedStorage:WaitForChild("ProgressionRemotes")
+print("[ProgressionUI] Interface iniciando...")
+local Remotes -- preenchido no final, quando o servidor responder
 
 local T = UIKit.Theme
 local new = UIKit.new
@@ -705,7 +706,7 @@ for index, item in ipairs(Config.ShopItems) do
 
 	actionButton.Activated:Connect(function()
 		local data = state.data
-		if not data then
+		if not data or not Remotes then
 			return
 		end
 		if data.Equipped == item.Id then
@@ -975,6 +976,17 @@ end)
 ---------------------------------------------------------------------
 -- Conexão com o servidor
 ---------------------------------------------------------------------
+workspace.CurrentCamera:GetPropertyChangedSignal("ViewportSize"):Connect(updateFit)
+updateFit()
+
+Remotes = ReplicatedStorage:WaitForChild("ProgressionRemotes", 15)
+if not Remotes then
+	titleLabel.Text = "Servidor offline"
+	warn("[ProgressionUI] Não achei ReplicatedStorage.ProgressionRemotes. O Script 'Main' do servidor está rodando? Veja os erros no Output.")
+	return
+end
+print("[ProgressionUI] Conectado ao servidor!")
+
 Remotes:WaitForChild("DataChanged").OnClientEvent:Connect(function(data)
 	state.data = data
 	refreshAll()
@@ -989,9 +1001,6 @@ Remotes:WaitForChild("Notify").OnClientEvent:Connect(function(kind: string, payl
 		showAchievement(payload)
 	end
 end)
-
-workspace.CurrentCamera:GetPropertyChangedSignal("ViewportSize"):Connect(updateFit)
-updateFit()
 
 task.spawn(function()
 	local ok, data, available = pcall(function()

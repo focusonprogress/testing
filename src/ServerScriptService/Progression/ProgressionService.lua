@@ -124,7 +124,6 @@ local function buildOverhead(player: Player, character: Model)
 	billboard.StudsOffset = Vector3.new(0, 2.7, 0)
 	billboard.MaxDistance = 90
 	billboard.LightInfluence = 0
-	billboard.ResetOnSpawn = false
 
 	local nameLabel = Instance.new("TextLabel")
 	nameLabel.Name = "NameLabel"
@@ -486,6 +485,7 @@ function Progression.Init()
 	for _, player in ipairs(Players:GetPlayers()) do
 		task.spawn(onPlayerAdded, player)
 	end
+	print("[Progression] Servidor iniciado!")
 end
 
 return Progression
